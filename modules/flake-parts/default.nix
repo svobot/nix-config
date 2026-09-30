@@ -8,6 +8,7 @@
     inputs.nixos-unified.flakeModules.default
 
     # Our modules
+    ./actions.nix
     ./agenix-rekey.nix
     ./apps.nix
     ./configurations.nix

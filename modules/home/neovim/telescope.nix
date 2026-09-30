@@ -37,7 +37,7 @@
             height = 0.80;
             preview_cutoff = 120;
           };
-          path_display = ["truncate"];
+          path_display = [ "truncate" ];
 
           mappings = {
             i = {
@@ -88,61 +88,63 @@
       };
     };
   };
-  highlightOverride = let
-    bg.__raw = ''vim.api.nvim_get_hl(0, { name = "BufferLineBuffer" }).bg'';
-    fg.__raw = ''vim.api.nvim_get_hl(0, { name = "TelescopeNormal" }).fg'';
-    bg_alt.__raw = ''vim.api.nvim_get_hl(0, { name = "Visual" }).bg'';
-    green.__raw = ''vim.api.nvim_get_hl(0, { name = "String" }).fg'';
-    red.__raw = ''vim.api.nvim_get_hl(0, { name = "DiagnosticError" }).fg'';
-  in {
-    TelescopeBorder = {
-      inherit bg;
-      fg = bg_alt;
+  highlightOverride =
+    let
+      bg.__raw = ''vim.api.nvim_get_hl(0, { name = "BufferLineBuffer" }).bg'';
+      fg.__raw = ''vim.api.nvim_get_hl(0, { name = "TelescopeNormal" }).fg'';
+      bg_alt.__raw = ''vim.api.nvim_get_hl(0, { name = "Visual" }).bg'';
+      green.__raw = ''vim.api.nvim_get_hl(0, { name = "String" }).fg'';
+      red.__raw = ''vim.api.nvim_get_hl(0, { name = "DiagnosticError" }).fg'';
+    in
+    {
+      TelescopeBorder = {
+        inherit bg;
+        fg = bg_alt;
+      };
+      TelescopeNormal = {
+        inherit bg;
+      };
+      TelescopePreviewBorder = {
+        fg = bg;
+        inherit bg;
+      };
+      TelescopePreviewNormal = {
+        inherit bg;
+      };
+      TelescopePreviewTitle = {
+        fg = bg;
+        bg = green;
+      };
+      TelescopePromptBorder = {
+        fg = bg_alt;
+        bg = bg_alt;
+      };
+      TelescopePromptNormal = {
+        inherit fg;
+        bg = bg_alt;
+      };
+      TelescopePromptCounter = {
+        inherit fg;
+        bg = bg_alt;
+      };
+      TelescopePromptPrefix = {
+        fg = red;
+        bg = bg_alt;
+      };
+      TelescopePromptTitle = {
+        fg = bg;
+        bg = red;
+      };
+      TelescopeResultsBorder = {
+        fg = bg;
+        inherit bg;
+      };
+      TelescopeResultsNormal = {
+        inherit bg;
+      };
+      TelescopeResultsTitle = {
+        fg = bg;
+        inherit bg;
+      };
     };
-    TelescopeNormal = {
-      inherit bg;
-    };
-    TelescopePreviewBorder = {
-      fg = bg;
-      inherit bg;
-    };
-    TelescopePreviewNormal = {
-      inherit bg;
-    };
-    TelescopePreviewTitle = {
-      fg = bg;
-      bg = green;
-    };
-    TelescopePromptBorder = {
-      fg = bg_alt;
-      bg = bg_alt;
-    };
-    TelescopePromptNormal = {
-      inherit fg;
-      bg = bg_alt;
-    };
-    TelescopePromptCounter = {
-      inherit fg;
-      bg = bg_alt;
-    };
-    TelescopePromptPrefix = {
-      fg = red;
-      bg = bg_alt;
-    };
-    TelescopePromptTitle = {
-      fg = bg;
-      bg = red;
-    };
-    TelescopeResultsBorder = {
-      fg = bg;
-      inherit bg;
-    };
-    TelescopeResultsNormal = {
-      inherit bg;
-    };
-    TelescopeResultsTitle = {
-      fg = bg;
-      inherit bg;
-    };
-  };
 }

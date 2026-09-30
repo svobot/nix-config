@@ -47,7 +47,7 @@ in
             default = "􀫀";
           };
           escape = true;
-          exec = ''${waybar}/bin/waybar-mediaplayer.py --player spotify 2> /dev/null''; # Filter player based on name
+          exec = "${waybar}/bin/waybar-mediaplayer.py --player spotify 2> /dev/null"; # Filter player based on name
           on-click = ''${pkgs.sway}/bin/swaymsg "[app_id=\"spotify\"]" focus'';
           on-click-right = "${pkgs.playerctl}/bin/playerctl -p spotify play-pause";
         };

@@ -2,7 +2,7 @@
 with lib;
 let
   rgbToHex = rgb: foldl (acc: v: acc + v) "#" (map (v: fixedWidthString 2 "0" (toHexString v)) rgb);
-  mapColorAttrset = mapAttrsRecursive (p: v: if isList v && length v == 3 then rgbToHex v else v);
+  mapColorAttrset = mapAttrsRecursive (_: v: if isList v && length v == 3 then rgbToHex v else v);
 in
 mapColorAttrset {
   default = {

@@ -35,7 +35,7 @@ in
             default = "􀫀";
           };
           escape = true;
-          exec = ''${pkgs.waybar-mediaplayer}/bin/waybar-mediaplayer.py --player spotify 2> /dev/null''; # Filter player based on name
+          exec = "${pkgs.waybar-mediaplayer}/bin/waybar-mediaplayer.py --player spotify 2> /dev/null"; # Filter player based on name
           on-click = ''
             ${pkgs.niri}/bin/niri msg -j windows |\
             ${pkgs.jq}/bin/jq 'first(.[] | select(.app_id == "spotify")) | .id' |\
@@ -46,7 +46,7 @@ in
 
         "niri/window" = {
           tooltip = false;
-          on-click = ''${pkgs.niri}/bin/niri msg action toggle-overview'';
+          on-click = "${pkgs.niri}/bin/niri msg action toggle-overview";
         };
 
         tray = {
