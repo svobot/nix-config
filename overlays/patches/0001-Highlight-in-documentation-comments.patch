@@ -1,0 +1,25 @@
+From 52a7b4a0c7b25540e4b4b3aa619e3e870f45b81b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tom=C3=A1=C5=A1=20Svoboda?= <svoboda@posteo.net>
+Date: Sat, 3 May 2025 19:17:36 +0200
+Subject: [PATCH] Highlight in documentation comments
+
+---
+ lua/todo-comments/highlight.lua | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lua/todo-comments/highlight.lua b/lua/todo-comments/highlight.lua
+index 7a3d4e0..2ae369f 100644
+--- a/lua/todo-comments/highlight.lua
++++ b/lua/todo-comments/highlight.lua
+@@ -63,7 +63,7 @@ function M.is_comment(buf, row, col)
+   if vim.treesitter.highlighter.active[buf] then
+     local captures = vim.treesitter.get_captures_at_pos(buf, row, col)
+     for _, c in ipairs(captures) do
+-      if c.capture == "comment" then
++      if c.capture == "comment" or c.capture == "comment.documentation" then
+         return true
+       end
+     end
+-- 
+2.48.1
+

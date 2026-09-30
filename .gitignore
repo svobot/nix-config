@@ -1,0 +1,4 @@
+result
+overlays/pragmata-pro/*.zip
+secrets/rekeyed/.tmp.*
+/.pre-commit-config.yaml

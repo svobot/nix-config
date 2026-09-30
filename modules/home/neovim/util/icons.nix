@@ -1,0 +1,31 @@
+{
+  BufferClose = "×";
+  DiagnosticError = "";
+  DiagnosticHint = "󰌵"; # 
+  DiagnosticInfo = "󰋼";
+  DiagnosticWarn = "";
+  Ellipsis = "…";
+  FileModified = "●";
+  FileNew = "";
+  FileReadOnly = "";
+  GitAdd = "";
+  GitBranch = "";
+  GitChange = ""; # 柳
+  GitConflict = "";
+  GitDelete = "";
+  GitIgnored = "◌";
+  GitRenamed = "➜";
+  GitSignChanged = "┃"; # ▎
+  GitSignDeleted = "◢"; # ▶
+  GitSignTopDeleted = "◥";
+  IndentationRuler = "▏";
+  Search = "";
+  Selected = "❯";
+  TodoFix = "";
+  TodoHack = "";
+  TodoNote = ""; # 
+  TodoPerf = ""; # 祥
+  TodoTest = "";
+  TodoTodo = "";
+  TodoWarn = "";
+}
