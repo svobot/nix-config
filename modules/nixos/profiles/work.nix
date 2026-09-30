@@ -33,10 +33,6 @@ in
       rekeyFile = self + "/secrets/work-gitconfig.age";
       owner = user.name;
     };
-    work-kolide = {
-      rekeyFile = self + "/secrets/work-kolide.age";
-      path = "${config.services.kolide-launcher.enrollSecretDirectory}/secret";
-    };
   };
 
   virtualisation.docker = {
@@ -52,7 +48,6 @@ in
   ];
 
   environment.persistence."/nix/state".directories = [
-    "/var/kolide-k2"
     "/var/lib/docker"
     {
       directory = nb.dir.state;
@@ -112,12 +107,6 @@ in
       # nil is treated as enabled, which makes the daemon refuse an
       # unprivileged `up -m` (GHSA-qcpp-8vwj-hhwr)
       config.ServerSSHAllowed = false;
-    };
-
-    kolide-launcher = {
-      enable = true;
-      autoupdateInterval = "90000h";
-      autoupdaterInitialDelay = "90000h";
     };
   };
 

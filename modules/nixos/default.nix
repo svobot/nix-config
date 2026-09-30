@@ -8,9 +8,9 @@ in
   imports = [
     # External input modules (shared across all NixOS hosts)
     inputs.agenix.nixosModules.default
+    inputs.disko.nixosModules.default
     inputs.home-manager.nixosModules.home-manager
     inputs.impermanence.nixosModules.impermanence
-    inputs.kolide-launcher.nixosModules.kolide-launcher
     inputs.lanzaboote.nixosModules.lanzaboote
     inputs.nix-index-database.nixosModules.nix-index
   ]

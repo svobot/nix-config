@@ -36,6 +36,7 @@ in
           "input"
           "video"
         ]
+    ++ lib.optionals config.programs.gamemode.enable [ "gamemode" ]
     ++ lib.optionals config.virtualisation.docker.enable [ "docker" ]
     ++ lib.optionals config.virtualisation.libvirtd.enable [ "libvirtd" ]
     ++ lib.optionals config.virtualisation.podman.enable [ "podman" ]

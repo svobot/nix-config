@@ -66,7 +66,6 @@ in
   hardware = {
     brillo.enable = true;
     enableRedistributableFirmware = true;
-    i2c.enable = true;
     graphics.enable = true;
   };
 

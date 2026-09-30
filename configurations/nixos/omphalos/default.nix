@@ -2,7 +2,6 @@
 {
   config,
   flake,
-  pkgs,
   ...
 }:
 let
@@ -15,6 +14,7 @@ in
     self.nixosModules.users-svoboda
     self.nixosModules.profiles-workstation
     self.nixosModules.profiles-work
+    self.nixosModules.services-kolide
     self.nixosModules.btrfs-root
     self.nixosModules.hardware-thinkpad-t14s-gen4
     self.nixosModules.hardware-efi
@@ -23,6 +23,7 @@ in
     self.nixosModules.hardware-dac
     self.nixosModules.hardware-ddcci
     self.nixosModules.hardware-interception-tools
+    self.nixosModules.hardware-logitech
     self.nixosModules.hardware-voyager
 
     # Host-specific files
@@ -126,7 +127,6 @@ in
       HandlePowerKeyLongPress = "reboot";
     };
     upower.criticalPowerAction = "Hibernate";
-    udev.packages = with pkgs; [ logitech-udev-rules ];
   };
 
   systemd.tmpfiles.rules = [ "w /sys/power/image_size - - - - 0" ];

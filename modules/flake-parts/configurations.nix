@@ -17,6 +17,7 @@ in
 {
   flake = {
     nixosConfigurations = {
+      neon = mkNixos (self + "/configurations/nixos/neon");
       omphalos = mkNixos (self + "/configurations/nixos/omphalos");
     };
 

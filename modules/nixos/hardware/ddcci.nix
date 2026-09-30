@@ -24,6 +24,8 @@ in
 
   environment.systemPackages = [ pkgs.ddcutil ];
 
+  hardware.i2c.enable = true;
+
   services.udev.extraRules = ''
     SUBSYSTEM=="i2c-dev", ACTION=="add", ATTR{name}=="AMDGPU DM*", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci-attach.service"
     SUBSYSTEM=="drm", ACTION=="change", ENV{HOTPLUG}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci-attach.service"
