@@ -10,6 +10,7 @@ let
 in
 {
   imports = with self.homeModules; [
+    graphical-niri-binds
     graphical-niri-niri
     graphical-niri-waybar
   ];
@@ -29,10 +30,7 @@ in
     packages = with pkgs; [
       fuzzel
       wl-clipboard
-      brillo # TODO: change to brightnessctl
-      brightnessctl
       nirius
-      osd-brightness
       xwayland-satellite
     ];
   };
