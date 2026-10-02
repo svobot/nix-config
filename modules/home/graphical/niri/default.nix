@@ -32,6 +32,7 @@ in
       brillo # TODO: change to brightnessctl
       brightnessctl
       nirius
+      osd-brightness
       xwayland-satellite
     ];
   };

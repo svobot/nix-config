@@ -4,9 +4,18 @@
   pkgs,
   ...
 }:
+let
+  # Upstream ddcci_remove never unregisters its devices, so once a monitor is
+  # unplugged every later attach on that bus fails with EEXIST until the module
+  # is reloaded. Fix pending upstream:
+  # https://gitlab.com/ddcci-driver-linux/ddcci-driver-linux/-/merge_requests/19
+  ddcci-driver = config.boot.kernelPackages.ddcci-driver.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./ddcci-fix-i2c-remove.patch ];
+  });
+in
 {
   boot = {
-    extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+    extraModulePackages = [ ddcci-driver ];
     kernelModules = [
       "ddcci"
       "ddcci-backlight"
@@ -20,29 +29,33 @@
     SUBSYSTEM=="drm", ACTION=="change", ENV{HOTPLUG}=="1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci-attach.service"
   '';
 
-  # Kernels since 6.8 no longer let ddcci probe DDC buses on its own, so every
-  # amdgpu i2c bus is checked with ddcutil and attached by hand.
+  # Kernels since 6.8 no longer let ddcci probe DDC buses on its own, so the
+  # DDC bus of every connected external connector is checked with ddcutil and
+  # attached by hand.
   systemd.services.ddcci-attach = {
     description = "Attach ddcci to DDC/CI capable displays";
     startLimitIntervalSec = 0;
-    serviceConfig.Type = "oneshot";
+    serviceConfig = {
+      Type = "oneshot";
+      CacheDirectory = "ddcutil";
+      Environment = "XDG_CACHE_HOME=/var/cache";
+      # Lets a burst of hotplug events from one replug coalesce into one run.
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+    };
     script = ''
+      # DisplayPort carries DDC/CI over AUX, exposed as the connector's child
+      # i2c adapter; other connectors use the adapter behind the ddc link.
       buses() {
-        for dev in /sys/class/i2c-dev/i2c-*; do
-          case "$(cat "$dev/name")" in
-            "AMDGPU DM"*) echo "''${dev##*/i2c-}" ;;
-          esac
-        done
-      }
-
-      externalConnected() {
-        for status in /sys/class/drm/card*-*/status; do
-          case "$status" in
+        for conn in /sys/class/drm/card*-*; do
+          case "$conn" in
             *eDP* | *Writeback*) continue ;;
           esac
-          [ "$(cat "$status")" = connected ] && return 0
+          [ "$(cat "$conn/status" 2>/dev/null)" = connected ] || continue
+          set -- "$conn"/i2c-*
+          bus=$1
+          [ -e "$bus" ] || bus=$(readlink "$conn/ddc" 2>/dev/null)
+          [ -n "$bus" ] && echo "''${bus##*/i2c-}"
         done
-        return 1
       }
 
       bound() {
@@ -61,17 +74,25 @@
         bound "$1"
       }
 
-      if ! externalConnected; then
-        for bus in $(buses); do
-          detach "$bus"
-        done
-        exit 0
-      fi
+      active=" $(buses | tr '\n' ' ')"
+
+      for client in /sys/bus/i2c/devices/*-0037; do
+        [ -e "$client" ] || continue
+        [ "$(cat "$client/name" 2>/dev/null)" = ddcci ] || continue
+        bus=''${client##*/}
+        bus=''${bus%-0037}
+        case "$active" in
+          *" $bus "*) ;;
+          *) detach "$bus" ;;
+        esac
+      done
+
+      [ -n "$(buses)" ] || exit 0
 
       # The ddcci probe gets ENODEV while amdgpu is still committing a modeset,
       # and leaves the client unbound when it does, so keep retrying until the
       # link answers.
-      for _ in 1 2 3 4 5 6 7 8; do
+      for _ in 1 2 3 4; do
         attached=0
         pending=0
         for bus in $(buses); do

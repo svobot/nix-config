@@ -105,6 +105,15 @@ in
     fake.external = [ "nix-store" ];
   };
 
+  osd-brightness = writeShellApp {
+    name = "osd-brightness";
+    inputs = with final; [
+      coreutils
+      swayosd
+    ];
+    execer = [ "cannot:${final.swayosd}/bin/swayosd-client" ];
+  };
+
   screenshot = writeShellApp {
     name = "screenshot";
     inputs = with final; [

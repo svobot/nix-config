@@ -10,5 +10,10 @@
         indent_size = 0;
       };
     };
+    settings.formatter.shfmt.options = [
+      "-ln"
+      "bash"
+      "-ci"
+    ];
   };
 }
