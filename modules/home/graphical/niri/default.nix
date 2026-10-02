@@ -42,21 +42,42 @@ in
     swayidle =
       let
         lock = "${lib.getExe config.programs.swaylock.package} -f";
+        niri = lib.getExe config.programs.niri.package;
+        whenDocked =
+          docked: name: command:
+          pkgs.writeShellApplication {
+            name = "idle-${name}-${if docked then "if" else "unless"}-docked";
+            runtimeInputs = [ pkgs.systemd ];
+            text = ''
+              state=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1 \
+                org.freedesktop.login1.Manager Docked)
+              if [[ "$state" == "b true" ]]; then docked=true; else docked=false; fi
+              [[ "$docked" == ${lib.boolToString docked} ]] || exit 0
+              exec ${command}
+            '';
+          };
+        ifDocked = whenDocked true;
+        unlessDocked = whenDocked false;
+        lockUnlessDocked = lib.getExe (unlessDocked "lock" lock);
       in
       {
         enable = true;
         events = {
-          before-sleep = lock;
+          before-sleep = lockUnlessDocked;
           inherit lock;
         };
         timeouts = [
           {
             timeout = 600;
-            command = lock;
+            command = lockUnlessDocked;
           }
           {
             timeout = 630;
-            command = "${lib.getExe config.programs.niri.package} msg action power-off-monitors";
+            command = lib.getExe (unlessDocked "power-off-monitors" "${niri} msg action power-off-monitors");
+          }
+          {
+            timeout = 3600;
+            command = lib.getExe (ifDocked "suspend" "systemctl suspend");
           }
         ];
       };
