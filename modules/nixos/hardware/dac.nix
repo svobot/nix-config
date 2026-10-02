@@ -33,12 +33,19 @@ in
       }
     ];
     udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", ATTR{idProduct}=="05df", RUN+="${relay_control} on"
+      KERNEL=="hidraw*", ACTION=="add", ATTRS{idVendor}=="16c0", ATTRS{idProduct}=="05df", TAG+="systemd", ENV{SYSTEMD_WANTS}+="dac_relay_attach.service"
     '';
   };
 
   systemd = {
     services = {
+      dac_relay_attach = {
+        description = "Power the DAC when its USB relay appears";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${relay_control} on";
+        };
+      };
       dac_trigger = {
         description = "DAC USB Relay Control Service";
         after = [ "multi-user.target" ];
