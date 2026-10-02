@@ -23,9 +23,19 @@ let
 in
 
 {
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", ATTR{idProduct}=="05df", RUN+="${relay_control} on"
-  '';
+  services = {
+    pipewire.wireplumber.extraConfig."50-nad-dac-priority"."monitor.alsa.rules" = [
+      {
+        matches = [ { "node.name" = "~alsa_output.usb-NAD_Electronics_NAD_USB_Audio-.*"; } ];
+        # Above built-in speakers (1000) and the USB default (1108), below the
+        # jack headphones of the laptop.
+        actions.update-props."priority.session" = 1500;
+      }
+    ];
+    udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="16c0", ATTR{idProduct}=="05df", RUN+="${relay_control} on"
+    '';
+  };
 
   systemd = {
     services = {

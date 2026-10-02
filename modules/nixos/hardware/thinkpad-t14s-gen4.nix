@@ -79,6 +79,18 @@ in
   services = {
     fprintd.enable = true;
     hardware.bolt.enable = true;
+    # The UCM profile gives the 3.5mm jack its own sink and source nodes that
+    # only become available while something is plugged in, so a high priority
+    # makes them win over any other device for exactly that time.
+    pipewire.wireplumber.extraConfig."50-jack-priority"."monitor.alsa.rules" = [
+      {
+        matches = [
+          { "node.name" = "~alsa_output.pci-.*HiFi__Headphones__sink"; }
+          { "node.name" = "~alsa_input.pci-.*HiFi__Mic2__source"; }
+        ];
+        actions.update-props."priority.session" = 3000;
+      }
+    ];
     thinkfan = {
       enable = true;
       extraArgs = [
