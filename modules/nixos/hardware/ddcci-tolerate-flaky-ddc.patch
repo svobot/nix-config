@@ -1,0 +1,136 @@
+--- a/ddcci/ddcci.c
++++ b/ddcci/ddcci.c
+@@ -30,6 +30,7 @@
+ #define DDCCI_RECV_BUFFER_SIZE 130
+ #define DEVICE_NAME "ddcci"
+ #define DDCCI_MAX_CAP_CHUNKS 200
++#define DDCCI_CAP_CHUNK_RETRIES 8
+ 
+ static unsigned int delay = 60;
+ static unsigned short autoprobe_addrs[127] = {0xF0, 0xF2, 0xF4, 0xF6, 0xF8};
+@@ -279,14 +280,24 @@
+ {
+ 	struct ddcci_bus_drv_data *drv_data;
+ 	unsigned char *recvbuf;
++	unsigned int readlen;
+ 	int ret;
+ 
+ 	drv_data = i2c_get_clientdata(client);
+ 	recvbuf = drv_data->recv_buffer;
+ 
++	/* Over-reading past the end of the reply makes some displays serve
++	   stale buffer contents and defer the following requests, so only
++	   ask for the frame the caller can take. */
++	readlen = len + 3;
++	if (drv_data->quirks & DDCCI_QUIRK_SKIP_FIRST_BYTE)
++		readlen++;
++	if (readlen > DDCCI_RECV_BUFFER_SIZE)
++		readlen = DDCCI_RECV_BUFFER_SIZE;
++
+ 	/* Read frame */
+ 	ret = __ddcci_read(client, addr, p_flag,
+-		drv_data->quirks, recvbuf, DDCCI_RECV_BUFFER_SIZE);
++		drv_data->quirks, recvbuf, readlen);
+ 	if (ret < 0)
+ 		return ret;
+ 
+@@ -324,7 +335,7 @@
+ static int ddcci_get_caps(struct i2c_client *client, unsigned char addr,
+ 			  unsigned char *buf, unsigned int len)
+ {
+-	int result = 0, counter = 0, offset = 0;
++	int result = 0, counter = 0, offset = 0, tries;
+ 	unsigned char cmd[3] = { DDCCI_COMMAND_CAPS, 0x00, 0x00 };
+ 	unsigned char *chunkbuf = kzalloc(35, GFP_KERNEL);
+ 
+@@ -332,31 +343,36 @@
+ 		return -ENOMEM;
+ 
+ 	do {
+-		/* Send command */
+-		result = ddcci_write(client, addr, true, cmd, sizeof(cmd));
+-		if (result < 0)
+-			goto err_free;
+-		msleep(delay);
+-		/* read result chunk */
+-		result = ddcci_read(client, addr, true, chunkbuf,
+-				    (len > 32) ? 35 : len+3);
++		/* The offset is part of every request, so a chunk the display
++		   garbled or was not ready for can be asked for again. */
++		for (tries = 0; tries < DDCCI_CAP_CHUNK_RETRIES; tries++) {
++			if (tries)
++				msleep(delay);
++			/* Send command */
++			result = ddcci_write(client, addr, true, cmd, sizeof(cmd));
++			if (result < 0)
++				continue;
++			msleep(delay);
++			/* read result chunk */
++			memset(chunkbuf, 0, 3);
++			result = ddcci_read(client, addr, true, chunkbuf,
++					    (len > 32) ? 35 : len+3);
++			if (result < 0)
++				continue;
++			/* check chunk header */
++			if (result < 3
++			    || chunkbuf[0] != DDCCI_REPLY_CAPS
++			    || chunkbuf[1] != cmd[1]
++			    || chunkbuf[2] != cmd[2]) {
++				result = -EIO;
++				continue;
++			}
++			break;
++		}
+ 		if (result < 0)
+ 			goto err_free;
+ 
+ 		if (result > 0) {
+-			/* check chunk header */
+-			if (chunkbuf[0] != DDCCI_REPLY_CAPS) {
+-				result = -EIO;
+-				goto err_free;
+-			}
+-			if (chunkbuf[1] != cmd[1] || chunkbuf[2] != cmd[2]) {
+-				result = -EIO;
+-				goto err_free;
+-			}
+-			if (result < 3) {
+-				result = -EIO;
+-				goto err_free;
+-			}
+ 			memcpy(buf, chunkbuf+3, min((unsigned int)result-3, len));
+ 
+ 			counter++;
+@@ -366,8 +382,6 @@
+ 			buf += result-3;
+ 			cmd[1] = offset >> 8;
+ 			cmd[2] = offset & 0xFF;
+-			/* Another superfluous read to make some devices happy... */
+-			ddcci_read(client, addr, true, NULL, 2);
+ 		}
+ 	} while (result > 3 && counter < DDCCI_MAX_CAP_CHUNKS);
+ 
+@@ -431,7 +445,8 @@
+ 	msleep(delay);
+ 
+ 	/* Receive response */
+-	ret = i2c_master_recv(client, buffer, DDCCI_RECV_BUFFER_SIZE);
++	ret = i2c_master_recv(client, buffer,
++			      min((unsigned int)len + 4, (unsigned int)DDCCI_RECV_BUFFER_SIZE));
+ 	if (ret < 0) {
+ 		dev_dbg(&client->dev,
+ 			"[%02x:%02x] receiving identification response resulted in errno %d\n",
+@@ -1519,11 +1534,9 @@
+ 	/* Read identification and check for quirks */
+ 	ret = ddcci_identify_device(client, addr, buffer, 29);
+ 	if (ret < 0) {
+-		if (!dependent && (ret == -EBADMSG || ret == -EMSGSIZE)) {
+-			dev_warn(&device->dev, "DDC/CI main device sent broken response on identification. Trying to detect solely based on capability information.\n");
+-		} else {
++		if (dependent)
+ 			goto err_free;
+-		}
++		dev_warn(&device->dev, "DDC/CI main device identification failed (%d). Trying to detect solely based on capability information.\n", ret);
+ 	}
+ 
+ 	if (ret == 29 && buffer[0] == DDCCI_REPLY_ID) {

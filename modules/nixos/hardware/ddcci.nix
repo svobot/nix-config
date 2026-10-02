@@ -9,8 +9,18 @@ let
   # unplugged every later attach on that bus fails with EEXIST until the module
   # is reloaded. Fix pending upstream:
   # https://gitlab.com/ddcci-driver-linux/ddcci-driver-linux/-/merge_requests/19
+  #
+  # The probe reads 130 bytes per reply, far past the end of any DDC/CI frame,
+  # and aborts on the first bad chunk of the capability string. The Dell
+  # U3225QE serves stale buffer contents and defers the next request when
+  # over-read, which on a native DisplayPort link (neon) shows up as AUX
+  # timeouts on a quarter of the reads, so the probe never bound there and
+  # answered maybe one probe in ten over USB4 (omphalos).
   ddcci-driver = config.boot.kernelPackages.ddcci-driver.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./ddcci-fix-i2c-remove.patch ];
+    patches = (old.patches or [ ]) ++ [
+      ./ddcci-fix-i2c-remove.patch
+      ./ddcci-tolerate-flaky-ddc.patch
+    ];
   });
 in
 {
