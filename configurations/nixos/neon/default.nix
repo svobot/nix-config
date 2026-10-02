@@ -22,6 +22,7 @@ in
     # Host-specific files
     ./disko.nix
     ./gaming.nix
+    ./graphical.nix
     ./hardware.nix
   ];
 

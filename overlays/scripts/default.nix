@@ -52,6 +52,8 @@ let
         scripts = [ "bin/${args.name}" ];
       }
       // solutions;
+
+      meta.mainProgram = args.name;
     };
 in
 {

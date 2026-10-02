@@ -1,10 +1,26 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 {
-  home-manager.users.svoboda = lib.optionalAttrs config.programs.sway.enable {
+  home-manager.users.svoboda = {
+    # VCP 60 (Input Source) values of the U3225QE: 0x19 Thunderbolt, 0x0f
+    # DisplayPort, 0x11 HDMI.
+    programs.niri.settings.binds."Mod+Shift+S" = {
+      action.spawn = [
+        (lib.getExe pkgs.ddcutil)
+        "--model"
+        "DELL U3225QE"
+        "setvcp"
+        "60"
+        "0x0f"
+      ];
+      hotkey-overlay.title = "Hand the monitor over to neon";
+    };
+  }
+  // lib.optionalAttrs config.programs.sway.enable {
     wayland.windowManager.sway = {
       config = {
         input = {
