@@ -13,7 +13,7 @@ in
     nix
     nixpkgs
     registry
-    resolved
+    services-resolved
     zram
   ];
 
