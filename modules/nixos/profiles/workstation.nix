@@ -10,6 +10,11 @@ in
     pam-limits
   ];
 
+  age.secrets.wallpaper = {
+    rekeyFile = self + "/secrets/wallpaper.age";
+    owner = "svoboda";
+  };
+
   home-manager.users.svoboda.imports = with self.homeModules; [
     graphical
     graphical-niri

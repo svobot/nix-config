@@ -4,7 +4,10 @@
     check.enable = true;
     settings.hooks = {
       actionlint.enable = true;
-      check-added-large-files.enable = true;
+      check-added-large-files = {
+        enable = true;
+        excludes = [ "wallpaper\\.age$" ];
+      };
       check-merge-conflicts.enable = true;
       check-symlinks.enable = true;
       convco.enable = true;

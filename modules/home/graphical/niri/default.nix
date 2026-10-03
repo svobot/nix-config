@@ -2,11 +2,15 @@
   config,
   flake,
   lib,
+  osConfig ? null,
   pkgs,
   ...
 }:
 let
   inherit (flake) self;
+  # The standalone home configuration has no NixOS side to decrypt the secret.
+  wallpaper =
+    if osConfig != null then osConfig.age.secrets.wallpaper.path else "${config.xdg.dataHome}/wall.jpg";
 in
 {
   imports = with self.homeModules; [
@@ -99,7 +103,7 @@ in
         indicator-caps-lock = true;
         scaling = "fill";
         show-failed-attempts = true;
-        image = "${config.xdg.dataHome}/wall.jpg";
+        image = wallpaper;
       };
     };
     wofi = {
@@ -141,7 +145,7 @@ in
         };
 
         Service = {
-          ExecStart = ''${lib.getExe pkgs.swaybg} -i "%h/.local/share/wall.jpg" -m fill'';
+          ExecStart = "${lib.getExe pkgs.swaybg} -i ${wallpaper} -m fill";
           Restart = "on-failure";
         };
 
