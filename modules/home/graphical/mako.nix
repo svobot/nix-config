@@ -42,6 +42,7 @@ ctx@{
         Description = "mako";
         Documentation = [ "man:mako(1)" ];
         PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
       };
       Service = {
         Type = "simple";
