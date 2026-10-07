@@ -1,0 +1,25 @@
+From 692439ec8d41008f9d9726359013f44d8473ad7b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jonas=20=C3=85dahl?= <jadahl@gmail.com>
+Date: Sun, 7 Jun 2026 10:14:35 +0200
+Subject: [PATCH] monitor/wayland: Don't leak zxdg_output_v1 proxy
+
+Part-of: <https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/10014>
+---
+ gdk/wayland/gdkmonitor-wayland.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gdk/wayland/gdkmonitor-wayland.c b/gdk/wayland/gdkmonitor-wayland.c
+index 68591df55b2..8aa6e5731f7 100644
+--- a/gdk/wayland/gdkmonitor-wayland.c
++++ b/gdk/wayland/gdkmonitor-wayland.c
+@@ -38,6 +38,7 @@ gdk_wayland_monitor_finalize (GObject *object)
+   g_free (monitor->name);
+ 
+   wl_output_destroy (monitor->output);
++  g_clear_pointer (&monitor->xdg_output, zxdg_output_v1_destroy);
+ 
+   G_OBJECT_CLASS (gdk_wayland_monitor_parent_class)->finalize (object);
+ }
+-- 
+GitLab
+
