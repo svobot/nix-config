@@ -32,7 +32,6 @@ in
 
   home = {
     packages = with pkgs; [
-      fuzzel
       wl-clipboard
       nirius
       xwayland-satellite
@@ -97,6 +96,10 @@ in
   };
 
   programs = {
+    fuzzel = {
+      enable = true;
+      settings.main.terminal = "alacritty --class {cmd} -T {cmd} -e {cmd}";
+    };
     swaylock = {
       enable = true;
       settings = {
