@@ -16,6 +16,7 @@ in
     self.nixosModules.hardware-tpm
     self.nixosModules.hardware-dac
     self.nixosModules.hardware-ddcci
+    self.nixosModules.hardware-flydigi
     self.nixosModules.hardware-logitech
     self.nixosModules.hardware-voyager
 
