@@ -5,6 +5,9 @@
   ...
 }:
 let
+  kernel = config.boot.kernelPackages.kernel;
+  kdir = "${kernel.dev}/lib/modules/${kernel.modDirVersion}/build";
+
   # Upstream ddcci_remove never unregisters its devices, so once a monitor is
   # unplugged every later attach on that bus fails with EEXIST until the module
   # is reloaded. Fix pending upstream:
@@ -16,11 +19,28 @@ let
   # over-read, which on a native DisplayPort link (neon) shows up as AUX
   # timeouts on a quarter of the reads, so the probe never bound there and
   # answered maybe one probe in ten over USB4 (omphalos).
+  #
+  # Upstream's `install` target copies the .ko by hand, skipping Kbuild's
+  # signing rule that emits the per-module `.ko.cer` nixpkgs' aggregateModules
+  # now requires. Fix pending upstream:
+  # https://github.com/NixOS/nixpkgs/pull/576387
   ddcci-driver = config.boot.kernelPackages.ddcci-driver.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       ./ddcci-fix-i2c-remove.patch
       ./ddcci-tolerate-flaky-ddc.patch
     ];
+    installPhase = ''
+      runHook preInstall
+
+      for module in ddcci ddcci-backlight; do
+        make -C "${kdir}" M="$PWD/$module" modules_install \
+          INSTALL_MOD_PATH="$out" INSTALL_MOD_DIR=extra DEPMOD=true $makeFlags
+      done
+
+      install -Dm644 include/linux/ddcci.h -t "$out/include/linux"
+
+      runHook postInstall
+    '';
   });
 in
 {
