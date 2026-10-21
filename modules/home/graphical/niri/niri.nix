@@ -78,6 +78,32 @@
         {
           matches = [
             {
+              app-id = "^steam$";
+              title = "^Steam$";
+            }
+          ];
+          default-column-width.proportion = 2.0 / 3.0;
+        }
+        {
+          matches = [
+            {
+              app-id = "^steam$";
+              title = "^Steam Big Picture Mode$";
+            }
+          ];
+          open-fullscreen = true;
+        }
+        {
+          matches = [ { app-id = "^steam$"; } ];
+          excludes = [
+            { title = "^Steam$"; }
+            { title = "^Steam Big Picture Mode$"; }
+          ];
+          open-floating = true;
+        }
+        {
+          matches = [
+            {
               app-id = "firefox$";
               title = "^Picture-in-Picture$";
             }

@@ -25,6 +25,7 @@ in
     ./gaming.nix
     ./graphical.nix
     ./hardware.nix
+    ./steam-remoteplay-bigpicture.nix
   ];
 
   # Platform
